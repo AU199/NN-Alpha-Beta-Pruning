@@ -1,0 +1,12 @@
+/.vscode
+/chessModel.keras
+/chessModelEval.keras
+/Data
+/dataProccesing.py
+/games.npy
+/game_from_board.pgn
+/numTypeMoves.npy
+/something.py
+/Untitled-1.txt
+/yFixer.py
+/__pycache__

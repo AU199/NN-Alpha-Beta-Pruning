@@ -5,18 +5,35 @@ import dataProccesing
 import numpy as np
 import time
 
-board = chess.Board("r1bqkb1r/1pp2ppp/p1p2n2/4N3/4P3/2N5/PPPP1PPP/R1BQK2R b KQkq - 0 6")
+board = chess.Board()
 evalModel = keras.models.load_model("chessModelEval.keras")
 positionModel = keras.models.load_model("chessModel.keras")
 intMove = np.load("numTypeMoves.npy", allow_pickle=True).item()
 intMove = dict(zip(intMove.values(), intMove.keys()))
 
+def sumPieces(board:chess.Board):
+    posSum = 0
+    pieceTotal = {chess.PAWN: 1, chess.BISHOP: 3.2, chess.KNIGHT: 3, chess.KING: 200, chess.QUEEN: 10, chess.ROOK: 5}
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece != None:
 
+            if piece.color == chess.WHITE:
+                posSum += pieceTotal[piece.piece_type]
+            else:
+                posSum -= pieceTotal[piece.piece_type]
+    posSum += 1 if board.has_castling_rights(chess.WHITE) else 0
+    posSum -= 1 if board.has_castling_rights(chess.BLACK) else 0
+    
+    return posSum
 def eval(board):
     matrixBoard = dataProccesing.boardToMatrix(board)
     matrixBoard = np.expand_dims(matrixBoard, axis=0)
-    thing = evalModel.predict(matrixBoard, verbose=0)
-    return thing
+    
+    evalNN = evalModel.predict(matrixBoard, verbose=0)
+    evalSum = sumPieces(board)
+    total = evalNN+evalSum
+    return total
 
 
 def getBestMoves(board: chess.Board, numMoves):
